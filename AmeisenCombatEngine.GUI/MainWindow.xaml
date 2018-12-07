@@ -9,12 +9,12 @@
     <Grid>
         <ProgressBar x:Name="healthMe" HorizontalAlignment="Left" Height="20" Margin="10,41,0,0" VerticalAlignment="Top" Width="200" Foreground="#FFFF4A4A" BorderBrush="#FFFF4A4A" Background="{x:Null}" BorderThickness="2"/>
         <ProgressBar x:Name="energyMe" HorizontalAlignment="Left" Height="20" Margin="10,66,0,0" VerticalAlignment="Top" Width="200" Foreground="#FF5C9FFF" BorderBrush="#FF5C9FFF" Background="{x:Null}" BorderThickness="2"/>
-        <Button x:Name="buttonDoIteration" Content="Do Iteration" HorizontalAlignment="Left" Margin="135,270,0,0" VerticalAlignment="Top" Width="75" Click="ButtonDoIteration_Click" Foreground="White" Background="{x:Null}" BorderBrush="#FFFF7400" BorderThickness="1"/>
+        <Button x:Name="buttonDoIteration" Content="Do Iteration" HorizontalAlignment="Left" Margin="135,270,0,0" VerticalAlignment="Top" Width="75" Click="ButtonDoIteration_Click" Foreground="White" Background="{x:Null}" BorderBrush="White" BorderThickness="2"/>
         <ProgressBar x:Name="healthTarget" HorizontalAlignment="Left" Height="20" Margin="285,41,0,0" VerticalAlignment="Top" Width="200" Foreground="#FFFF4A4A" BorderBrush="#FFFF4A4A" Background="{x:Null}" BorderThickness="2"/>
         <ProgressBar x:Name="energyTarget" HorizontalAlignment="Left" Height="20" Margin="285,66,0,0" VerticalAlignment="Top" Width="200" Foreground="#FF5C9FFF" BorderBrush="#FF5C9FFF" Background="{x:Null}" BorderThickness="2"/>
-        <Label x:Name="nameMe" Content="Me (CombatEngine)" HorizontalAlignment="Left" Margin="5,12,0,0" VerticalAlignment="Top" Foreground="White" FontFamily="Arial"/>
-        <Label x:Name="nameTarget" Content="Test Enemy (Only uses one spell)" HorizontalAlignment="Left" Margin="280,12,0,0" VerticalAlignment="Top" Foreground="White" FontFamily="Arial"/>
-        <Button x:Name="buttonResetSimulation" Content="Reset Simulation" HorizontalAlignment="Left" Margin="10,270,0,0" VerticalAlignment="Top" Width="120" Click="ButtonResetSimulation_Click" Foreground="White" Background="{x:Null}" BorderBrush="#FFFF7400" BorderThickness="1"/>
+        <Label x:Name="nameMe" Content="Me" HorizontalAlignment="Left" Margin="5,12,0,0" VerticalAlignment="Top" Foreground="White" FontFamily="Arial"/>
+        <Label x:Name="nameTarget" Content="Test Enemy" HorizontalAlignment="Left" Margin="280,12,0,0" VerticalAlignment="Top" Foreground="White" FontFamily="Arial"/>
+        <Button x:Name="buttonResetSimulation" Content="Reset Simulation" HorizontalAlignment="Left" Margin="10,270,0,0" VerticalAlignment="Top" Width="120" Click="ButtonResetSimulation_Click" Foreground="White" Background="{x:Null}" BorderBrush="White" BorderThickness="2"/>
         <Label x:Name="healthlabelMe" Content="0 / 0" HorizontalAlignment="Left" Margin="10,39,0,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}" FontFamily="Arial Black"/>
         <Label x:Name="energylabelMe" Content="0 / 0" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}" FontFamily="Arial Black"/>
         <Label x:Name="healthlabelTarget" Content="0 / 0" HorizontalAlignment="Left" Margin="285,39,0,0" VerticalAlignment="Top" Foreground="White" Background="{x:Null}" FontFamily="Arial Black"/>
@@ -28,9 +28,9 @@
         <Button x:Name="buttonExit" Content="X" HorizontalAlignment="Left" Margin="478,-2,-2,0" VerticalAlignment="Top" Width="20" Height="20" Click="ButtonExit_Click" Background="{x:Null}" BorderBrush="White" Foreground="White" BorderThickness="2" FontWeight="Bold"/>
         <ComboBox x:Name="spellSelection" HorizontalAlignment="Left" Margin="285,269,0,0" VerticalAlignment="Top" Width="200" SelectionChanged="SpellSelection_SelectionChanged" Background="{x:Null}"/>
         <Label x:Name="scorelabel" Content="Score: 0 / 0" HorizontalAlignment="Left" Margin="285,296,0,0" VerticalAlignment="Top" Width="147" Foreground="White" FontFamily="Arial Black"/>
-        <Button x:Name="buttonDoSimulations" Content="Reset" HorizontalAlignment="Left" Margin="437,299,0,0" VerticalAlignment="Top" Width="48" Click="ButtonDoSimulations_Click" Foreground="White" Background="{x:Null}" BorderBrush="#FFFF7400" BorderThickness="1"/>
-        <TextBox x:Name="simulationCount" HorizontalAlignment="Left" Height="20" Margin="10,295,0,0" TextWrapping="Wrap" Text="100" VerticalAlignment="Top" Width="95" Foreground="White" SelectionBrush="#FF494949" Background="{x:Null}" BorderBrush="Red" BorderThickness="1"/>
-        <Button x:Name="buttonDoSimulations1" Content="Do Simulations" HorizontalAlignment="Left" Margin="110,295,0,0" VerticalAlignment="Top" Width="100" Click="ButtonDoSimulations" Foreground="White" Background="{x:Null}" BorderBrush="#FFFF7400" BorderThickness="1"/>
+        <Button x:Name="buttonDoSimulations" Content="Reset" HorizontalAlignment="Left" Margin="437,299,0,0" VerticalAlignment="Top" Width="48" Click="ButtonDoSimulations_Click" Foreground="White" Background="{x:Null}" BorderBrush="White" BorderThickness="2"/>
+        <TextBox x:Name="simulationCount" HorizontalAlignment="Left" Height="22" Margin="10,295,0,0" TextWrapping="Wrap" Text="100" VerticalAlignment="Top" Width="95" Foreground="White" SelectionBrush="#FF494949" Background="{x:Null}" BorderBrush="White" BorderThickness="2"/>
+        <Button x:Name="buttonDoSimulations1" Content="Do Simulations" HorizontalAlignment="Left" Margin="110,295,0,0" VerticalAlignment="Top" Width="100" Click="ButtonDoSimulations" Foreground="White" Background="{x:Null}" BorderBrush="White" BorderThickness="2"/>
         <Label Content="⚔️" HorizontalAlignment="Center" Margin="0,-84,0,0" VerticalAlignment="Center" Foreground="White" FontSize="36"/>
         <Label Content="🛡️" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Foreground="White" FontSize="36"/>
     </Grid>

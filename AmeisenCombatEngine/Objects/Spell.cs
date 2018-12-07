@@ -8,6 +8,7 @@ namespace AmeisenCombatEngineCore.Objects
     {
         public string SpellName { get; set; }
         public double EnergyCost { get; set; }
+        public double MaxRange { get; set; }
         public int CooldownMs { get; set; }
         public SpellType MainSpellType { get; set; }
         public SpellExecution SpellExecution { get; set; }
@@ -17,6 +18,7 @@ namespace AmeisenCombatEngineCore.Objects
         public Spell(
             string spellName,
             double energyCost,
+            double maxRange,
             int cooldownMs,
             SpellType mainSpellType,
             SpellExecution spellExecution,
@@ -28,6 +30,7 @@ namespace AmeisenCombatEngineCore.Objects
             MainSpellType = mainSpellType;
             SpellExecution = spellExecution;
             SpellImpacts = spellImpacts;
+            MaxRange = maxRange;
         }
 
         public void StartCooldown() => new Thread(new ThreadStart(WaitOnCooldown)).Start();

@@ -2,6 +2,8 @@
 using AmeisenCombatEngineCore.Enums;
 using AmeisenCombatEngineCore.FSM.Enums;
 using AmeisenCombatEngineCore.Objects;
+using AmeisenCombatEngineCore.Strategies;
+using AmeisenCombatEngineCore.Structs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,14 +19,18 @@ namespace AmeisenCombatEngine.GUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Me Me { get; set; }
-        private Target Target { get; set; }
+        private Unit Me { get; set; }
+        private Unit Target { get; set; }
+
         private CombatEngine CombatEngine { get; set; }
+        private CombatEngine CombatEngine2 { get; set; }
+
         private List<Spell> Spells { get; set; }
+        private Spell ActiveSpellForEnemy { get; set; }
+
         private bool FightIsOver { get; set; }
         private int ScoreMe { get; set; }
         private int ScoreTarget { get; set; }
-        private Spell ActiveSpellForEnemy { get; set; }
 
         public MainWindow()
         {
@@ -35,7 +41,8 @@ namespace AmeisenCombatEngine.GUI
                 (
                     "Hit",
                     0,
-                    1000,
+                    3,
+                    9,
                     SpellType.Damage,
                     SpellExecution.Melee,
                     new Dictionary<SpellType, double>()
@@ -47,7 +54,8 @@ namespace AmeisenCombatEngine.GUI
                 (
                     "Big Hit",
                     0,
-                    5000,
+                    3,
+                    9,
                     SpellType.Damage,
                     SpellExecution.Melee,
                     new Dictionary<SpellType, double>()
@@ -59,7 +67,8 @@ namespace AmeisenCombatEngine.GUI
                 (
                     "Heal",
                     220,
-                    2000,
+                    30,
+                    9,
                     SpellType.Heal,
                     SpellExecution.Cast,
                     new Dictionary<SpellType, double>()
@@ -71,7 +80,8 @@ namespace AmeisenCombatEngine.GUI
                 (
                     "Big Heal",
                     360,
-                    4000,
+                    30,
+                    9,
                     SpellType.Heal,
                     SpellExecution.Cast,
                     new Dictionary<SpellType, double>()
@@ -101,20 +111,32 @@ namespace AmeisenCombatEngine.GUI
             combatlogMe.Document.Blocks.Clear();
             combatlogTarget.Document.Blocks.Clear();
 
+            /*
             Random rnd = new Random();
 
-            int health = rnd.Next(20000,30000);
+            int health = rnd.Next(20000, 30000);
             int healthTarget = rnd.Next(20000, 30000);
 
             int energy = rnd.Next(5000, 10000);
             int energyTarget = rnd.Next(5000, 10000);
+            */
 
-            Me = new Me(health, health, energy, energy, CombatState.Standing);
-            Target = new Target(healthTarget, healthTarget, energyTarget, energyTarget, CombatState.Standing);
+            int health = 20000;
+            int healthTarget = 20000;
+
+            int energy = 10000;
+            int energyTarget = 10000;
+
+            Vector3 positionMe = new Vector3(0, 0, 0);
+            Vector3 positionTarget = new Vector3(0, 0, 0);
+
+            Me = new Unit(health, health, energy, energy, CombatState.Standing, positionMe);
+            Target = new Unit(healthTarget, healthTarget, energyTarget, energyTarget, CombatState.Standing, positionTarget);
 
             this.Dispatcher.Invoke(UpdateViews);
 
-            CombatEngine = new CombatEngine(Me, Target, Spells);
+            CombatEngine = new CombatEngine(Me, Target, Spells, new DpsSimpleStrategy(Spells, 30));
+            CombatEngine2 = new CombatEngine(Target, Me, Spells, new DpsSimpleStrategy(Spells, 70));
 
             LogCombatActionMe("Initializing...");
             LogCombatActionTarget("Initializing...");
@@ -168,26 +190,41 @@ namespace AmeisenCombatEngine.GUI
                 return;
             }
 
-            if (Me.Energy + 25 <= Me.MaxEnergy)
+            if (Me.Energy + 5 <= Me.MaxEnergy)
             {
-                Me.Energy += 25;
+                Me.Energy += 5;
             }
 
-            if (Target.Energy + 25 <= Target.MaxEnergy)
+            if (Target.Energy + 5 <= Target.MaxEnergy)
             {
-                Target.Energy += 25;
+                Target.Energy += 5;
             }
 
             string usedSpellName = CombatEngine.DoIteration();
+            string usedSpellName2 = CombatEngine2.DoIteration();
+
             if (updateViews)
             {
                 this.Dispatcher.Invoke(() => LogCombatActionMe($"Use Spell: {usedSpellName}"));
             }
 
-            Spell usedSpell = Spells.Where(spell => spell.SpellName == usedSpellName).First();
+            if (usedSpellName != "")
+            {
+                Spell usedSpell = Spells
+                .Where(spell => spell.SpellName == usedSpellName)
+                .First();
 
-            ProcessSpellUsage(usedSpell, Me, Target, updateViews);
-            ProcessSpellUsage(ActiveSpellForEnemy, Target, Me, updateViews);
+                ProcessSpellUsage(usedSpell, Me, Target, updateViews);
+            }
+
+            if (usedSpellName2 != "")
+            {
+                Spell usedSpell2 = Spells
+                .Where(spell => spell.SpellName == usedSpellName2)
+                .First();
+
+                ProcessSpellUsage(usedSpell2, Target, Me, updateViews);
+            }
         }
 
         private void ProcessSpellUsage(Spell usedSpell, Unit a, Unit b, bool updateViews = true)
@@ -197,7 +234,7 @@ namespace AmeisenCombatEngine.GUI
             {
                 if (updateViews)
                 {
-                    if (a.GetType() == typeof(Me))
+                    if (a == Me)
                     {
                         this.Dispatcher.Invoke(() => LogCombatActionMe($"Out of energy...", "#4286ff"));
                     }
@@ -219,7 +256,7 @@ namespace AmeisenCombatEngine.GUI
 
                         if (updateViews)
                         {
-                            if (a.GetType() == typeof(Me))
+                            if (a == Me)
                             {
                                 this.Dispatcher.Invoke(() => LogCombatActionMe($"Damage done: {spellImpact.Value}", "#ff4e42"));
                             }
@@ -242,7 +279,7 @@ namespace AmeisenCombatEngine.GUI
 
                         if (updateViews)
                         {
-                            if (a.GetType() == typeof(Me))
+                            if (a == Me)
                             {
                                 this.Dispatcher.Invoke(() => LogCombatActionMe($"Healing done: {spellImpact.Value}", "#77f442"));
                             }
@@ -355,7 +392,7 @@ namespace AmeisenCombatEngine.GUI
                 do
                 {
                     DoIteration(false);
-                    Thread.Sleep(500);
+                    Thread.Sleep(10);
                 } while (!FightIsOver);
             }
 

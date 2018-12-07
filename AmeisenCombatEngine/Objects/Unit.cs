@@ -1,4 +1,6 @@
 ﻿using AmeisenCombatEngineCore.FSM.Enums;
+using AmeisenCombatEngineCore.Structs;
+using System;
 
 namespace AmeisenCombatEngineCore.Objects
 {
@@ -14,18 +16,27 @@ namespace AmeisenCombatEngineCore.Objects
 
         public CombatState CombatState { get; set; }
 
+        public Vector3 Position { get; set; }
+
         public Unit(
             double health, 
             double maxHealth, 
             double energy, 
             double maxEnergy, 
-            CombatState combatState)
+            CombatState combatState,
+            Vector3 position)
         {
             Health = health;
             MaxHealth = maxHealth;
             Energy = energy;
             MaxEnergy = maxEnergy;
             CombatState = combatState;
+            Position = position;
         }
+
+        public double GetDistanceToUnit(Unit otherUnit) 
+            => Math.Sqrt((Position.X - otherUnit.Position.X) * (Position.X - otherUnit.Position.X) +
+                         (Position.Y - otherUnit.Position.Y) * (Position.Y - otherUnit.Position.Y) +
+                         (Position.Z - otherUnit.Position.Z) * (Position.Z - otherUnit.Position.Z));
     }
 }

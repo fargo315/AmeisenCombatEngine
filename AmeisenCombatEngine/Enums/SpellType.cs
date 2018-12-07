@@ -14,6 +14,7 @@ namespace AmeisenCombatEngineCore.Enums
         Shield,
         Block,
         Reflect,
-        Buff
+        Buff,
+        Gapcloser
     }
 }

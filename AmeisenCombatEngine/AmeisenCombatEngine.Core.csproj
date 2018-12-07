@@ -54,7 +54,6 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -77,11 +76,13 @@
     <Compile Include="FSM\States\Silenced.cs" />
     <Compile Include="FSM\States\Standing.cs" />
     <Compile Include="FSM\States\Stunned.cs" />
-    <Compile Include="Objects\Me.cs" />
+    <Compile Include="Interfaces\ISpellStrategy.cs" />
     <Compile Include="Objects\Spell.cs" />
-    <Compile Include="Objects\Target.cs" />
     <Compile Include="Objects\Unit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Strategies\DpsSimpleStrategy.cs" />
+    <Compile Include="Structs\Vector3.cs" />
+    <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

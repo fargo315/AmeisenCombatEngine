@@ -1,8 +1,6 @@
-﻿using AmeisenCombatEngineCore.Enums;
+﻿using AmeisenCombatEngineCore.Interfaces;
 using AmeisenCombatEngineCore.Objects;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AmeisenCombatEngineCore
 {
@@ -11,34 +9,19 @@ namespace AmeisenCombatEngineCore
         public List<Spell> Spells { get; set; }
         public Unit Me { get; set; }
         public Unit Target { get; set; }
+        public ISpellStrategy SpellStrategy { get; set; }
 
-        private readonly string learningDataFilepath = Environment.CurrentDirectory + "\\Data\\combatData.csv";
-
-        public CombatEngine(Unit me, Unit target, List<Spell> spells)
+        public CombatEngine(Unit me, Unit target, List<Spell> spells, ISpellStrategy spellStrategy)
         {
             Me = me;
             Target = target;
             Spells = spells;
+            SpellStrategy = spellStrategy;
         }
 
         public string DoIteration()
         {
-            List<Spell> DamageSpells = Spells.Where(spell => spell.MainSpellType == SpellType.Damage).ToList();
-            List<Spell> HealSpells = Spells.Where(spell => spell.MainSpellType == SpellType.Heal).ToList();
-
-            if(Me.HealthPercentage < Target.HealthPercentage - 5 
-                || Me.HealthPercentage < 25)
-            {
-                return HealSpells.OrderByDescending(
-                    spell => spell.SpellImpacts.Where(
-                        spellimpact => spellimpact.Key == SpellType.Heal).First().Value).First().SpellName;
-            }
-            else
-            {
-                return DamageSpells.OrderByDescending(
-                    spell => spell.SpellImpacts.Where(
-                        spellimpact => spellimpact.Key == SpellType.Damage).First().Value).First().SpellName;
-            }
+            return SpellStrategy.DoRoutine(Me, Target);
         }
     }
 }
