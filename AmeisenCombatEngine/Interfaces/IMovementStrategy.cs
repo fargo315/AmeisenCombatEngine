@@ -1,4 +1,5 @@
 ﻿using AmeisenCombatEngineCore.Objects;
+using AmeisenCombatEngineCore.Structs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace AmeisenCombatEngineCore.Interfaces
 {
-    public interface ISpellStrategy
+    public interface IMovementStrategy
     {
-        Spell DoRoutine(Unit me, Unit target);
+        Vector3 CalculatePosition(Unit me, Unit target);
     }
 }

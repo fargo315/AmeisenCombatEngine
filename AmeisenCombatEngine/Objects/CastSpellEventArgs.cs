@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmeisenCombatEngineCore.FSM.Interfaces
+namespace AmeisenCombatEngineCore.Objects
 {
-    public interface IState
+    public class CastSpellEventArgs : EventArgs
     {
-
-        void DoThings();
+        public Spell Spell { get; set; }
     }
 }

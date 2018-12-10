@@ -6,11 +6,11 @@ using AmeisenCombatEngineCore.Strategies;
 using AmeisenCombatEngineCore.Structs;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Windows;
-using System.Windows.Documents;
+using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace AmeisenCombatEngine.GUI
 {
@@ -108,8 +108,6 @@ namespace AmeisenCombatEngine.GUI
         private void InitCombatEngine()
         {
             FightIsOver = false;
-            combatlogMe.Document.Blocks.Clear();
-            combatlogTarget.Document.Blocks.Clear();
 
             /*
             Random rnd = new Random();
@@ -127,25 +125,39 @@ namespace AmeisenCombatEngine.GUI
             int energy = 10000;
             int energyTarget = 10000;
 
-            Vector3 positionMe = new Vector3(0, 0, 0);
-            Vector3 positionTarget = new Vector3(0, 0, 0);
+            Vector3 positionMe = new Vector3(150, 40, 0);
+            Vector3 positionTarget = new Vector3(300, 40, 0);
 
             Me = new Unit(health, health, energy, energy, CombatState.Standing, positionMe);
             Target = new Unit(healthTarget, healthTarget, energyTarget, energyTarget, CombatState.Standing, positionTarget);
 
             this.Dispatcher.Invoke(UpdateViews);
 
-            CombatEngine = new CombatEngine(Me, Target, Spells, new DpsSimpleStrategy(Spells, 30));
-            CombatEngine2 = new CombatEngine(Target, Me, Spells, new DpsSimpleStrategy(Spells, 70));
+            CombatEngine = new CombatEngine(Me, Target, Spells, new SpellSimple(Spells, 30), new MovementCloseCombat());
+            CombatEngine.OnCastSpell += HandleMeCast;
+            CombatEngine.OnMoveCharacter += HandleMeMove;
 
-            LogCombatActionMe("Initializing...");
-            LogCombatActionTarget("Initializing...");
+            CombatEngine2 = new CombatEngine(Target, Me, Spells, new SpellSimple(Spells, 70), new MovementCloseCombat());
+            CombatEngine2.OnCastSpell += HandleTargetCast;
+            CombatEngine2.OnMoveCharacter += HandleTargetMove;
         }
 
-        private void ButtonDoIteration_Click(object sender, RoutedEventArgs e)
-        {
-            DoIteration();
-        }
+        private void HandleMeMove(object sender, EventArgs e)
+        => ProcessMovement(Me, ((MoveCharacterEventArgs)e).PositionToGoTo);
+
+        private void HandleTargetMove(object sender, EventArgs e)
+        => ProcessMovement(Target, ((MoveCharacterEventArgs)e).PositionToGoTo);
+
+
+        private void HandleMeCast(object sender, EventArgs e)
+            => ProcessSpellUsage(((CastSpellEventArgs)e).Spell, Me, Target);
+
+
+        private void HandleTargetCast(object sender, EventArgs e)
+            => ProcessSpellUsage(((CastSpellEventArgs)e).Spell, Target, Me);
+
+        private void ButtonDoIteration_Click(object sender, RoutedEventArgs e) => DoIteration();
+
 
         private void DoIteration(bool updateViews = true)
         {
@@ -156,12 +168,6 @@ namespace AmeisenCombatEngine.GUI
 
             if (Me.Health <= 0)
             {
-                if (updateViews)
-                {
-                    this.Dispatcher.Invoke(() => LogCombatActionMe($"I lost the fight..."));
-                    this.Dispatcher.Invoke(() => LogCombatActionTarget($"I won the fight..."));
-                }
-
                 ScoreTarget++;
                 FightIsOver = true;
 
@@ -174,12 +180,6 @@ namespace AmeisenCombatEngine.GUI
 
             if (Target.Health <= 0)
             {
-                if (updateViews)
-                {
-                    this.Dispatcher.Invoke(() => LogCombatActionMe($"I won the fight..."));
-                    this.Dispatcher.Invoke(() => LogCombatActionTarget($"I lost the fight..."));
-                }
-
                 ScoreMe++;
                 FightIsOver = true;
 
@@ -200,52 +200,12 @@ namespace AmeisenCombatEngine.GUI
                 Target.Energy += 5;
             }
 
-            string usedSpellName = CombatEngine.DoIteration();
-            string usedSpellName2 = CombatEngine2.DoIteration();
-
-            if (updateViews)
-            {
-                this.Dispatcher.Invoke(() => LogCombatActionMe($"Use Spell: {usedSpellName}"));
-            }
-
-            if (usedSpellName != "")
-            {
-                Spell usedSpell = Spells
-                .Where(spell => spell.SpellName == usedSpellName)
-                .First();
-
-                ProcessSpellUsage(usedSpell, Me, Target, updateViews);
-            }
-
-            if (usedSpellName2 != "")
-            {
-                Spell usedSpell2 = Spells
-                .Where(spell => spell.SpellName == usedSpellName2)
-                .First();
-
-                ProcessSpellUsage(usedSpell2, Target, Me, updateViews);
-            }
+            CombatEngine.DoIteration();
+            CombatEngine2.DoIteration();
         }
 
         private void ProcessSpellUsage(Spell usedSpell, Unit a, Unit b, bool updateViews = true)
         {
-            usedSpell.StartCooldown();
-            if (usedSpell.EnergyCost > a.Energy)
-            {
-                if (updateViews)
-                {
-                    if (a == Me)
-                    {
-                        this.Dispatcher.Invoke(() => LogCombatActionMe($"Out of energy...", "#4286ff"));
-                    }
-                    else
-                    {
-                        this.Dispatcher.Invoke(() => LogCombatActionTarget($"Out of energy...", "#4286ff"));
-                    }
-                }
-                return;
-            }
-
             a.Energy -= usedSpell.EnergyCost;
             foreach (KeyValuePair<SpellType, double> spellImpact in usedSpell.SpellImpacts)
             {
@@ -253,42 +213,11 @@ namespace AmeisenCombatEngine.GUI
                 {
                     case SpellType.Damage:
                         b.Health -= spellImpact.Value;
-
-                        if (updateViews)
-                        {
-                            if (a == Me)
-                            {
-                                this.Dispatcher.Invoke(() => LogCombatActionMe($"Damage done: {spellImpact.Value}", "#ff4e42"));
-                            }
-                            else
-                            {
-                                this.Dispatcher.Invoke(() => LogCombatActionTarget($"Damage done: {spellImpact.Value}", "#ff4e42"));
-                            }
-                        }
-
                         this.Dispatcher.Invoke(UpdateViews);
                         break;
 
                     case SpellType.Heal:
                         a.Health += spellImpact.Value;
-
-                        if (a.Health > a.MaxHealth)
-                        {
-                            a.Health = a.MaxHealth;
-                        }
-
-                        if (updateViews)
-                        {
-                            if (a == Me)
-                            {
-                                this.Dispatcher.Invoke(() => LogCombatActionMe($"Healing done: {spellImpact.Value}", "#77f442"));
-                            }
-                            else
-                            {
-                                this.Dispatcher.Invoke(() => LogCombatActionTarget($"Healing done: {spellImpact.Value}", "#77f442"));
-                            }
-                        }
-
                         this.Dispatcher.Invoke(UpdateViews);
                         break;
 
@@ -296,6 +225,34 @@ namespace AmeisenCombatEngine.GUI
                         break;
                 }
             }
+        }
+
+        private void ProcessMovement(Unit unit, Vector3 newPosition)
+        {
+            Vector3 currentPosition = unit.Position;
+
+            if (currentPosition.X < newPosition.X)
+            {
+                currentPosition.X += 1;
+            }
+
+            if (currentPosition.Y < newPosition.Y)
+            {
+                currentPosition.Y += 1;
+            }
+
+            if (currentPosition.X > newPosition.X)
+            {
+                currentPosition.X -= 1;
+            }
+
+            if (currentPosition.Y > newPosition.Y)
+            {
+                currentPosition.Y -= 1;
+            }
+
+            unit.Position = currentPosition;
+            this.Dispatcher.Invoke(UpdateViews);
         }
 
         private void UpdateViews()
@@ -319,56 +276,35 @@ namespace AmeisenCombatEngine.GUI
             energylabelTarget.Content = $"{Target.Energy} / {Target.MaxEnergy}";
 
             scorelabel.Content = $"Score: {ScoreMe} / {ScoreTarget}";
+
+            mainCanvas.Children.Clear();
+
+            DrawRectangleOnCanvas(Me.Position.X, Me.Position.Y, new SolidColorBrush(Colors.White));
+            DrawRectangleOnCanvas(Target.Position.X, Target.Position.Y, new SolidColorBrush(Colors.Red));
         }
 
-        private void LogCombatActionMe(string text, string color = "white")
+        private void DrawRectangleOnCanvas(double x, double y, Brush brush)
         {
-            BrushConverter bc = new BrushConverter();
-            TextRange tr = new TextRange(combatlogMe.Document.ContentEnd, combatlogMe.Document.ContentEnd)
+            Rectangle rect = new Rectangle
             {
-                Text = $"{text}\r"
+                Stroke = brush,
+                Fill = brush,
+                Width = 4,
+                Height = 4,
+                StrokeThickness = 2
             };
 
-            try
-            {
-                tr.ApplyPropertyValue(TextElement.ForegroundProperty,
-                    bc.ConvertFromString(color));
-            }
-            catch (FormatException) { }
-            combatlogMe.ScrollToEnd();
+            Canvas.SetLeft(rect, x);
+            Canvas.SetTop(rect, y);
+            mainCanvas.Children.Add(rect);
         }
 
-        private void LogCombatActionTarget(string text, string color = "white")
-        {
-            BrushConverter bc = new BrushConverter();
-            TextRange tr = new TextRange(combatlogTarget.Document.ContentEnd, combatlogTarget.Document.ContentEnd)
-            {
-                Text = $"{text}\r"
-            };
+        private void Window_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e) => DragMove();
 
-            try
-            {
-                tr.ApplyPropertyValue(TextElement.ForegroundProperty,
-                    bc.ConvertFromString(color));
-            }
-            catch (FormatException) { };
-            combatlogTarget.ScrollToEnd();
-        }
+        private void ButtonExit_Click(object sender, RoutedEventArgs e) => Close();
 
-        private void Window_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            DragMove();
-        }
+        private void ButtonResetSimulation_Click(object sender, RoutedEventArgs e) => InitCombatEngine();
 
-        private void ButtonExit_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
-        private void ButtonResetSimulation_Click(object sender, RoutedEventArgs e)
-        {
-            InitCombatEngine();
-        }
 
         private void ButtonDoSimulations_Click(object sender, RoutedEventArgs e)
         {

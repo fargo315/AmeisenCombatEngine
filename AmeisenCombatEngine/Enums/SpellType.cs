@@ -15,6 +15,7 @@ namespace AmeisenCombatEngineCore.Enums
         Block,
         Reflect,
         Buff,
-        Gapcloser
+        Gapcloser, // like Warriors Charge
+        Gapbuilder // like Mages Blink
     }
 }

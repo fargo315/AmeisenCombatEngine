@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace AmeisenCombatEngineCore.Strategies
 {
-    public class DpsSimpleStrategy : ISpellStrategy
+    public class SpellSimple : ISpellStrategy
     {
         private List<Spell> Spells { get; set; }
         private double MinHp { get; set; }
@@ -17,18 +17,19 @@ namespace AmeisenCombatEngineCore.Strategies
         /// Does Damage while own HP is not under 25%, if
         /// it is the case it will heal itself
         /// </summary>
-        public DpsSimpleStrategy(List<Spell> spells, double minHp = 25)
+        public SpellSimple(List<Spell> spells, double minHp = 25)
         {
             Spells = spells;
             MinHp = minHp;
         }
 
-        public string DoRoutine(Unit me, Unit target)
+        public Spell DoRoutine(Unit me, Unit target)
         {
-            List<Spell> DamageSpells = Utils.GetAllUseableSpellsBySpellType(Spells, SpellType.Damage, me.Energy);
-            List<Spell> HealSpells = Utils.GetAllUseableSpellsBySpellType(Spells, SpellType.Heal, me.Energy);
+            double distance = me.GetDistanceToUnit(target);
+            List<Spell> DamageSpells = Utils.GetAllUseableSpellsBySpellType(Spells, SpellType.Damage, me.Energy, distance);
+            List<Spell> HealSpells = Utils.GetAllUseableSpellsBySpellType(Spells, SpellType.Heal, me.Energy, distance);
 
-            string spellToUse = "";
+            Spell spellToUse = null;
 
             if (me.HealthPercentage < MinHp)
             {
@@ -39,15 +40,15 @@ namespace AmeisenCombatEngineCore.Strategies
                         .Where(spellimpact => spellimpact.Key == SpellType.Heal).First().Value).ToList()
                         .Where(spell => !spell.IsOnCooldown).ToList();
 
-                    spellToUse = healingSpells.Any() ? healingSpells.First().SpellName : "";
+                    spellToUse = healingSpells.Any() ? healingSpells.First() : null;
                 }
                 else
                 {
-                    spellToUse = "";
+                    spellToUse = null;
                 }
             }
 
-            if (spellToUse != "")
+            if (spellToUse != null)
             {
                 return spellToUse;
             }
@@ -59,11 +60,11 @@ namespace AmeisenCombatEngineCore.Strategies
                     .Where(spellimpact => spellimpact.Key == SpellType.Damage).First().Value).ToList()
                     .Where(spell => !spell.IsOnCooldown).ToList();
 
-                spellToUse = damageSpells.Any() ? damageSpells.First().SpellName : "";
+                spellToUse = damageSpells.Any() ? damageSpells.First() : null;
             }
             else
             {
-                spellToUse = "";
+                spellToUse = null;
             }
             return spellToUse;
         }
