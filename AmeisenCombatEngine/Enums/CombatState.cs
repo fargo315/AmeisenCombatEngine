@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmeisenCombatEngineCore.FSM.Enums
+namespace AmeisenCombatEngineCore.Enums
 {
     public enum CombatState
     {

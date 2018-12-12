@@ -11,5 +11,6 @@ namespace AmeisenCombatEngineCore.Enums
         Melee,
         Ranged,
         Cast,
+        Instant,
     }
 }

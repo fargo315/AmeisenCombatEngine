@@ -1,6 +1,5 @@
 ﻿using AmeisenCombatEngineCore;
 using AmeisenCombatEngineCore.Enums;
-using AmeisenCombatEngineCore.FSM.Enums;
 using AmeisenCombatEngineCore.Objects;
 using AmeisenCombatEngineCore.Strategies;
 using AmeisenCombatEngineCore.Structs;
@@ -25,7 +24,8 @@ namespace AmeisenCombatEngine.GUI
         private CombatEngine CombatEngine { get; set; }
         private CombatEngine CombatEngine2 { get; set; }
 
-        private List<Spell> Spells { get; set; }
+        private List<Spell> SpellsA { get; set; }
+        private List<Spell> SpellsB { get; set; }
         private Spell ActiveSpellForEnemy { get; set; }
 
         private bool FightIsOver { get; set; }
@@ -35,14 +35,14 @@ namespace AmeisenCombatEngine.GUI
         public MainWindow()
         {
             // Some sample spells
-            Spells = new List<Spell>()
+            SpellsA = new List<Spell>()
             {
                 new Spell
                 (
                     "Hit",
                     0,
                     3,
-                    9,
+                    500,
                     SpellType.Damage,
                     SpellExecution.Melee,
                     new Dictionary<SpellType, double>()
@@ -55,7 +55,7 @@ namespace AmeisenCombatEngine.GUI
                     "Big Hit",
                     0,
                     3,
-                    9,
+                    500,
                     SpellType.Damage,
                     SpellExecution.Melee,
                     new Dictionary<SpellType, double>()
@@ -65,28 +65,73 @@ namespace AmeisenCombatEngine.GUI
                 ),
                 new Spell
                 (
-                    "Heal",
-                    220,
+                    "Charge",
+                    200,
                     30,
-                    9,
-                    SpellType.Heal,
-                    SpellExecution.Cast,
+                    2500,
+                    SpellType.Gapcloser,
+                    SpellExecution.Instant,
                     new Dictionary<SpellType, double>()
                     {
-                        { SpellType.Heal, 300}
+                        { SpellType.Gapcloser, 12},
+                        { SpellType.Root, 2500}
                     }
                 ),
                 new Spell
                 (
-                    "Big Heal",
-                    360,
+                    "Regeneration",
+                    220,
                     30,
-                    9,
+                    1000,
                     SpellType.Heal,
-                    SpellExecution.Cast,
+                    SpellExecution.Instant,
                     new Dictionary<SpellType, double>()
                     {
-                        { SpellType.Heal, 800}
+                        { SpellType.Heal, 300}
+                    }
+                )
+            };
+
+            SpellsB = new List<Spell>()
+            {
+                new Spell
+                (
+                    "Shot",
+                    250,
+                    30,
+                    500,
+                    SpellType.Damage,
+                    SpellExecution.Ranged,
+                    new Dictionary<SpellType, double>()
+                    {
+                        { SpellType.Damage, 1000}
+                    }
+                ),
+                new Spell
+                (
+                    "Stunning Shot",
+                    500,
+                    30,
+                    3000,
+                    SpellType.Stun,
+                    SpellExecution.Ranged,
+                    new Dictionary<SpellType, double>()
+                    {
+                        { SpellType.Damage, 250},
+                        { SpellType.Stun, 2000}
+                    }
+                ),
+                new Spell
+                (
+                    "Backjump",
+                    250,
+                    int.MaxValue,
+                    2000,
+                    SpellType.Gapbuilder,
+                    SpellExecution.Instant,
+                    new Dictionary<SpellType, double>()
+                    {
+                        { SpellType.Gapbuilder, 12}
                     }
                 )
             };
@@ -96,7 +141,7 @@ namespace AmeisenCombatEngine.GUI
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            foreach (Spell spell in Spells)
+            foreach (Spell spell in SpellsA)
             {
                 spellSelection.Items.Add(spell);
             }
@@ -119,25 +164,25 @@ namespace AmeisenCombatEngine.GUI
             int energyTarget = rnd.Next(5000, 10000);
             */
 
-            int health = 20000;
-            int healthTarget = 20000;
+            int health = 8000;
+            int healthTarget = 8000;
 
             int energy = 10000;
             int energyTarget = 10000;
 
-            Vector3 positionMe = new Vector3(150, 40, 0);
-            Vector3 positionTarget = new Vector3(300, 40, 0);
+            Vector3 positionMe = new Vector3(100, 50, 0);
+            Vector3 positionTarget = new Vector3(300, 50, 0);
 
             Me = new Unit(health, health, energy, energy, CombatState.Standing, positionMe);
             Target = new Unit(healthTarget, healthTarget, energyTarget, energyTarget, CombatState.Standing, positionTarget);
 
             this.Dispatcher.Invoke(UpdateViews);
 
-            CombatEngine = new CombatEngine(Me, Target, Spells, new SpellSimple(Spells, 30), new MovementCloseCombat());
+            CombatEngine = new CombatEngine(Me, Target, SpellsA, new SpellSimple(SpellsA, 30), new MovementCloseCombat());
             CombatEngine.OnCastSpell += HandleMeCast;
             CombatEngine.OnMoveCharacter += HandleMeMove;
 
-            CombatEngine2 = new CombatEngine(Target, Me, Spells, new SpellSimple(Spells, 70), new MovementCloseCombat());
+            CombatEngine2 = new CombatEngine(Target, Me, SpellsB, new SpellSimple(SpellsB, 0), new MovementDefensiveRanged(positionTarget));
             CombatEngine2.OnCastSpell += HandleTargetCast;
             CombatEngine2.OnMoveCharacter += HandleTargetMove;
         }
@@ -190,14 +235,14 @@ namespace AmeisenCombatEngine.GUI
                 return;
             }
 
-            if (Me.Energy + 5 <= Me.MaxEnergy)
+            if (Me.Energy + 1 <= Me.MaxEnergy)
             {
-                Me.Energy += 5;
+                Me.Energy += 1;
             }
 
-            if (Target.Energy + 5 <= Target.MaxEnergy)
+            if (Target.Energy + 1 <= Target.MaxEnergy)
             {
-                Target.Energy += 5;
+                Target.Energy += 1;
             }
 
             CombatEngine.DoIteration();
@@ -207,6 +252,10 @@ namespace AmeisenCombatEngine.GUI
         private void ProcessSpellUsage(Spell usedSpell, Unit a, Unit b, bool updateViews = true)
         {
             a.Energy -= usedSpell.EnergyCost;
+            Vector3 currentPosition = a.Position;
+            Vector3 enemyPosition = b.Position;
+            usedSpell.StartCooldown();
+
             foreach (KeyValuePair<SpellType, double> spellImpact in usedSpell.SpellImpacts)
             {
                 switch (spellImpact.Key)
@@ -221,6 +270,41 @@ namespace AmeisenCombatEngine.GUI
                         this.Dispatcher.Invoke(UpdateViews);
                         break;
 
+                    case SpellType.Stun:
+                        b.SetCombatState(CombatState.Stunned, (int)usedSpell.SpellImpacts[SpellType.Stun]);
+                        this.Dispatcher.Invoke(UpdateViews);
+                        break;
+
+                    case SpellType.Gapcloser:
+                        a.Position = enemyPosition;
+                        this.Dispatcher.Invoke(UpdateViews);
+                        break;
+
+                    case SpellType.Gapbuilder:
+                        if (currentPosition.X < enemyPosition.X)
+                        {
+                            currentPosition.X -= usedSpell.SpellImpacts[SpellType.Gapbuilder];
+                        }
+
+                        if (currentPosition.Y < enemyPosition.Y)
+                        {
+                            currentPosition.Y -= usedSpell.SpellImpacts[SpellType.Gapbuilder];
+                        }
+
+                        if (currentPosition.X >= enemyPosition.X)
+                        {
+                            currentPosition.X += usedSpell.SpellImpacts[SpellType.Gapbuilder];
+                        }
+
+                        if (currentPosition.Y >= enemyPosition.Y)
+                        {
+                            currentPosition.Y += usedSpell.SpellImpacts[SpellType.Gapbuilder];
+                        }
+
+                        a.Position = currentPosition;
+                        this.Dispatcher.Invoke(UpdateViews);
+                        break;
+
                     default:
                         break;
                 }
@@ -231,12 +315,12 @@ namespace AmeisenCombatEngine.GUI
         {
             Vector3 currentPosition = unit.Position;
 
-            if (currentPosition.X < newPosition.X)
+            if (currentPosition.X <= newPosition.X)
             {
                 currentPosition.X += 1;
             }
 
-            if (currentPosition.Y < newPosition.Y)
+            if (currentPosition.Y <= newPosition.Y)
             {
                 currentPosition.Y += 1;
             }
@@ -249,6 +333,16 @@ namespace AmeisenCombatEngine.GUI
             if (currentPosition.Y > newPosition.Y)
             {
                 currentPosition.Y -= 1;
+            }
+
+            if (currentPosition.X == newPosition.X)
+            {
+                currentPosition.X += new Random().Next(-2, 3);
+            }
+
+            if (currentPosition.Y == newPosition.Y)
+            {
+                currentPosition.Y += new Random().Next(-2, 3);
             }
 
             unit.Position = currentPosition;
@@ -276,6 +370,9 @@ namespace AmeisenCombatEngine.GUI
             energylabelTarget.Content = $"{Target.Energy} / {Target.MaxEnergy}";
 
             scorelabel.Content = $"Score: {ScoreMe} / {ScoreTarget}";
+
+            combatStateMe.Content = Me.CombatState;
+            combatStateTarget.Content = Target.CombatState;
 
             mainCanvas.Children.Clear();
 

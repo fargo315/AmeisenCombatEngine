@@ -10,6 +10,7 @@ namespace AmeisenCombatEngineCore.Strategies
     {
         private List<Spell> Spells { get; set; }
         private double MinHp { get; set; }
+        public double FightingDistance { get; private set; }
 
         /// <summary>
         /// Simple DPS Strategy
@@ -21,6 +22,14 @@ namespace AmeisenCombatEngineCore.Strategies
         {
             Spells = spells;
             MinHp = minHp;
+
+            int count = 0;
+            foreach(Spell s in Utils.GetAllUseableSpellsBySpellType(Spells, SpellType.Damage, int.MaxValue, 0))
+            {
+                FightingDistance += s.MaxRange;
+                count++;
+            }
+            FightingDistance /= count;
         }
 
         public Spell DoRoutine(Unit me, Unit target)
@@ -28,45 +37,52 @@ namespace AmeisenCombatEngineCore.Strategies
             double distance = me.GetDistanceToUnit(target);
             List<Spell> DamageSpells = Utils.GetAllUseableSpellsBySpellType(Spells, SpellType.Damage, me.Energy, distance);
             List<Spell> HealSpells = Utils.GetAllUseableSpellsBySpellType(Spells, SpellType.Heal, me.Energy, distance);
+            List<Spell> GapcloserSpells = Utils.GetAllUseableSpellsBySpellType(Spells, SpellType.Gapcloser, me.Energy, distance);
+            List<Spell> GapbuilderSpells = Utils.GetAllUseableSpellsBySpellType(Spells, SpellType.Gapbuilder, me.Energy, distance);
+            List<Spell> StunSpells = Utils.GetAllUseableSpellsBySpellType(Spells, SpellType.Stun, me.Energy, distance);
+            List<Spell> RootSpells = Utils.GetAllUseableSpellsBySpellType(Spells, SpellType.Root, me.Energy, distance);
 
             Spell spellToUse = null;
 
+            if (distance < FightingDistance / 2)
+            { spellToUse = TryUseSpellFromSpellType(GapbuilderSpells, SpellType.Gapbuilder); }
+            if (spellToUse != null) { return spellToUse; }
+
+            if (distance > FightingDistance)
+            { spellToUse = TryUseSpellFromSpellType(GapcloserSpells, SpellType.Gapcloser); }
+            if (spellToUse != null) { return spellToUse; }
+
+            if (distance < 3.0)
+            { spellToUse = TryUseSpellFromSpellType(StunSpells, SpellType.Stun); }
+            if (spellToUse != null) { return spellToUse; }
+
+            if (distance < 3.0)
+            { spellToUse = TryUseSpellFromSpellType(RootSpells, SpellType.Root); }
+            if (spellToUse != null) { return spellToUse; }
+
             if (me.HealthPercentage < MinHp)
-            {
-                if (HealSpells.Count > 0)
-                {
-                    List<Spell> healingSpells =
-                    HealSpells.OrderByDescending(spell => spell.SpellImpacts
-                        .Where(spellimpact => spellimpact.Key == SpellType.Heal).First().Value).ToList()
-                        .Where(spell => !spell.IsOnCooldown).ToList();
+            { spellToUse = TryUseSpellFromSpellType(HealSpells, SpellType.Heal); }
+            if (spellToUse != null) { return spellToUse; }
+            
+            spellToUse = TryUseSpellFromSpellType(DamageSpells, SpellType.Damage);
+            return spellToUse;
+        }
 
-                    spellToUse = healingSpells.Any() ? healingSpells.First() : null;
-                }
-                else
-                {
-                    spellToUse = null;
-                }
-            }
-
-            if (spellToUse != null)
+        private Spell TryUseSpellFromSpellType(List<Spell> availableSpells, SpellType type)
+        {
+            if (availableSpells.Count > 0)
             {
-                return spellToUse;
-            }
-
-            if (DamageSpells.Count > 0)
-            {
-                List<Spell> damageSpells =
-                DamageSpells.OrderByDescending(spell => spell.SpellImpacts
-                    .Where(spellimpact => spellimpact.Key == SpellType.Damage).First().Value).ToList()
+                List<Spell> gapbuilderSpells =
+                availableSpells.OrderByDescending(spell => spell.SpellImpacts
+                    .Where(spellimpact => spellimpact.Key == type).First().Value).ToList()
                     .Where(spell => !spell.IsOnCooldown).ToList();
 
-                spellToUse = damageSpells.Any() ? damageSpells.First() : null;
+                return gapbuilderSpells.Any() ? gapbuilderSpells.First() : null;
             }
             else
             {
-                spellToUse = null;
+                return null;
             }
-            return spellToUse;
         }
     }
 }

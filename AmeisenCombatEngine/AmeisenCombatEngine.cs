@@ -1,4 +1,5 @@
-﻿using AmeisenCombatEngineCore.Interfaces;
+﻿using AmeisenCombatEngineCore.Enums;
+using AmeisenCombatEngineCore.Interfaces;
 using AmeisenCombatEngineCore.Objects;
 using AmeisenCombatEngineCore.Structs;
 using System;
@@ -30,6 +31,12 @@ namespace AmeisenCombatEngineCore
 
         public void DoIteration()
         {
+            if (Me.CombatState == CombatState.Stunned)
+            {
+                // TODO: check for un-stun abilities
+                return;
+            }
+
             CastSpellEventArgs argsCast = new CastSpellEventArgs
             {
                 Spell = SpellStrategy.DoRoutine(Me, Target)
@@ -37,6 +44,12 @@ namespace AmeisenCombatEngineCore
             if (argsCast.Spell != null)
             {
                 OnCastSpell.Invoke(this, argsCast);
+            }
+
+            if (Me.CombatState == CombatState.Rooted)
+            {
+                // TODO: check for un-root abilities
+                return;
             }
 
             MoveCharacterEventArgs argsMove = new MoveCharacterEventArgs

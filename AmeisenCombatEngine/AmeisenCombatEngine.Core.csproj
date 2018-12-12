@@ -75,6 +75,7 @@
     <Compile Include="Objects\Unit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Strategies\MovementCloseCombat.cs" />
+    <Compile Include="Strategies\MovementDefensiveRanged.cs" />
     <Compile Include="Strategies\SpellSimple.cs" />
     <Compile Include="Structs\Vector3.cs" />
     <Compile Include="Utils.cs" />

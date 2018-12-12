@@ -27,5 +27,7 @@
         <Button x:Name="buttonDoSimulations" Content="Do Simulations" HorizontalAlignment="Left" Margin="110,295,0,0" VerticalAlignment="Top" Width="100" Click="ButtonDoSimulations" Foreground="White" Background="{x:Null}" BorderBrush="White" BorderThickness="2"/>
         <Label Content="⚔️" HorizontalAlignment="Center" Margin="218,32,218,246" VerticalAlignment="Center" Foreground="White" FontSize="36"/>
         <Canvas x:Name="mainCanvas" HorizontalAlignment="Left" Height="171" Margin="10,93,0,0" VerticalAlignment="Top" Width="475" Background="#FF232323"/>
+        <Label x:Name="combatStateMe" Content="Label" HorizontalAlignment="Left" Margin="37,10,0,0" VerticalAlignment="Top" Foreground="White"/>
+        <Label x:Name="combatStateTarget" Content="Label" HorizontalAlignment="Left" Margin="358,10,0,0" VerticalAlignment="Top" Foreground="White"/>
     </Grid>
 </Window>
