@@ -178,11 +178,11 @@ namespace AmeisenCombatEngine.GUI
 
             this.Dispatcher.Invoke(UpdateViews);
 
-            CombatEngine = new CombatEngine(Me, Target, SpellsA, new SpellSimple(SpellsA, 30), new MovementCloseCombat());
+            CombatEngine = new CombatEngine(SpellsA, new SpellSimple(SpellsA, 30), new MovementCloseCombat());
             CombatEngine.OnCastSpell += HandleMeCast;
             CombatEngine.OnMoveCharacter += HandleMeMove;
 
-            CombatEngine2 = new CombatEngine(Target, Me, SpellsB, new SpellSimple(SpellsB, 0), new MovementDefensiveRanged(positionTarget));
+            CombatEngine2 = new CombatEngine(SpellsB, new SpellSimple(SpellsB, 0), new MovementDefensiveRanged(positionTarget));
             CombatEngine2.OnCastSpell += HandleTargetCast;
             CombatEngine2.OnMoveCharacter += HandleTargetMove;
         }
@@ -245,8 +245,8 @@ namespace AmeisenCombatEngine.GUI
                 Target.Energy += 1;
             }
 
-            CombatEngine.DoIteration();
-            CombatEngine2.DoIteration();
+            CombatEngine.DoIteration(Me, Target);
+            CombatEngine2.DoIteration(Target, Me);
         }
 
         private void ProcessSpellUsage(Spell usedSpell, Unit a, Unit b, bool updateViews = true)
