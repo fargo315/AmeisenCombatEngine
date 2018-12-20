@@ -53,7 +53,7 @@ namespace AmeisenCombatEngineCore
             };
             if (!argsMove.PositionToGoTo.Equals(new Vector3(0.0, 0.0, 0.0)))
             {
-                OnMoveCharacter.Invoke(this, argsMove);
+                OnMoveCharacter?.Invoke(this, argsMove);
             }
         }
     }

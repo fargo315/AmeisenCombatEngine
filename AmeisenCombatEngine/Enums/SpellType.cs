@@ -18,6 +18,11 @@ namespace AmeisenCombatEngineCore.Enums
         Gapcloser, // like Warriors Charge
         Gapbuilder, // like Mages Blink
         Stun,
-        Root
+        Root,
+        Dot,
+        Debuff,
+        Selfdamage,
+        Manarestore,
+        Fear
     }
 }

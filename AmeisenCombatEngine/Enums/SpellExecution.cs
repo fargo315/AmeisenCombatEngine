@@ -12,5 +12,6 @@ namespace AmeisenCombatEngineCore.Enums
         Ranged,
         Cast,
         Instant,
+        Channel,
     }
 }

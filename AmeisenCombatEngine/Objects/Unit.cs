@@ -21,13 +21,16 @@ namespace AmeisenCombatEngineCore.Objects
 
         public Vector3 Position { get; set; }
 
+        public List<string> Auras { get; set; }
+
         public Unit(
             double health,
             double maxHealth,
             double energy,
             double maxEnergy,
             CombatState combatState,
-            Vector3 position)
+            Vector3 position,
+            List<string> auras)
         {
             Health = health;
             MaxHealth = maxHealth;
@@ -35,6 +38,7 @@ namespace AmeisenCombatEngineCore.Objects
             MaxEnergy = maxEnergy;
             CombatState = combatState;
             Position = position;
+            Auras = auras;
             CombatStateThreads = new Dictionary<CombatState, Thread>();
         }
 
