@@ -6,9 +6,16 @@ namespace AmeisenCombatEngineCore.Strategies
 {
     public class MovementCloseCombat : IMovementStrategy
     {
+        double Distance { get; set; }
+
+        public MovementCloseCombat(double distance = 2.0)
+        {
+            Distance = distance;
+        }
+
         public Vector3 CalculatePosition(Unit me, Unit target)
         {
-            if(me.GetDistanceToUnit(target) > 2.0)
+            if(me.GetDistanceToUnit(target) > Distance)
             {
                 return target.Position;
             }
