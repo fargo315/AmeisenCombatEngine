@@ -23,6 +23,7 @@ namespace AmeisenCombatEngineCore.Enums
         Debuff,
         Selfdamage,
         Manarestore,
-        Fear
+        Fear,
+        Hot
     }
 }

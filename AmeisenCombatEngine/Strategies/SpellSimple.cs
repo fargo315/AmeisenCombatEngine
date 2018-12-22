@@ -12,6 +12,7 @@ namespace AmeisenCombatEngineCore.Strategies
         private double MinHp { get; set; }
         public double FightingDistance { get; private set; }
         public double MinHpPercentageToUseSelfDamage { get; private set; }
+        public bool ShouldHealOthers { get; private set; }
 
         /// <summary>
         /// Simple DPS Strategy
@@ -19,10 +20,11 @@ namespace AmeisenCombatEngineCore.Strategies
         /// Does Damage while own HP is not under 25%, if
         /// it is the case it will heal itself
         /// </summary>
-        public SpellSimple(List<Spell> spells, double minHp = 25, double minHpPercentageToUseSelfDamage = 60)
+        public SpellSimple(List<Spell> spells, double minHp = 25, double minHpPercentageToUseSelfDamage = 60, bool shouldHealOthers = false)
         {
             Spells = spells;
             MinHp = minHp;
+            ShouldHealOthers = shouldHealOthers;
 
             int count = 0;
             foreach (Spell s in Utils.GetAllUseableSpellsBySpellType(Spells, SpellType.Damage, int.MaxValue, 0))
@@ -75,6 +77,16 @@ namespace AmeisenCombatEngineCore.Strategies
                 }
             }
 
+            List<Spell> Hots = Utils.GetAllUseableSpellsBySpellType(Spells, SpellType.Hot, me.Energy, distance);
+            foreach (Spell spell in Hots)
+            {
+                if (!target.Auras.Contains(spell.SpellName.ToLower()))
+                {
+                    spellToUse = spell;
+                    if (spellToUse != null) { return spellToUse; }
+                }
+            }
+
             if (distance < FightingDistance / 2)
             {
                 spellToUse = GetSpellsAndTryUseIt(SpellType.Gapbuilder, me.Energy, distance);
@@ -87,7 +99,7 @@ namespace AmeisenCombatEngineCore.Strategies
                 if (spellToUse != null) { return spellToUse; }
             }
 
-            if (distance < 5.0)
+            if (distance < 6.0)
             {
                 spellToUse = GetSpellsAndTryUseIt(SpellType.Fear, me.Energy, distance);
                 if (spellToUse != null) { return spellToUse; }
@@ -100,8 +112,8 @@ namespace AmeisenCombatEngineCore.Strategies
                 spellToUse = GetSpellsAndTryUseIt(SpellType.Root, me.Energy, distance);
                 if (spellToUse != null) { return spellToUse; }
             }
-
-            if (me.HealthPercentage < MinHp)
+            
+            if (me.HealthPercentage < MinHp || (ShouldHealOthers && target.HealthPercentage < MinHp))
             {
                 spellToUse = GetSpellsAndTryUseIt(SpellType.Heal, me.Energy, distance);
                 if (spellToUse != null) { return spellToUse; }
